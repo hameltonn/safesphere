@@ -1,0 +1,460 @@
+"use client";
+
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { MotionConfig, motion, type Variants } from "framer-motion";
+import {
+  ArrowRight,
+  BellRing,
+  ChevronLeft,
+  ChevronRight,
+  Map,
+  Tent,
+  Users,
+  Volume2,
+  VolumeX,
+  type LucideIcon,
+} from "lucide-react";
+import { useTextToSpeech, voiceLangForLocale } from "@/hooks/useTextToSpeech";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+
+// ---------------------------------------------------------------------
+// app/public/onboarding/page.tsx — Phase 1 · Step 5 · Public Onboarding
+// Carousel. Full-screen, swipeable 4-slide value pitch (Framer Motion):
+//   1. Get real-time flood alerts
+//   2. See safe evacuation routes
+//   3. Find nearest shelter
+//   4. Stay connected with family
+// Dot indicators, Skip (top), and "Continue to Dashboard" on the last
+// slide.
+// ---------------------------------------------------------------------
+
+/** Where citizens land after onboarding — straight onto the citizen
+    dashboard. (Was /public/setup, which had no landing page of its own —
+    walking there caused a 404.) */
+const NEXT_URL = "/public/dashboard";
+
+type Slide = {
+  /** Large SVG icon for the chip — Phase 13 · Step 7 keeps the design
+      icon-driven so low-literacy citizens read pictures, not words. */
+  Icon: LucideIcon;
+  title: string;
+  description: string;
+  /** Spoken narration in English + Hindi (Phase 13 · Step 7): the button
+      reads the slide aloud in the citizen's preferred language. */
+  narration: { en: string; hi: string };
+  illustration: ReactNode;
+};
+
+function AlertIllustration() {
+  return (
+    <div className="relative w-64 rounded-2xl border border-white/10 bg-[var(--dl-navy-2)]/80 p-4 text-left shadow-[var(--dl-shadow-soft)]">
+      <div className="flex items-center gap-2">
+        <span className="h-2.5 w-2.5 animate-pulse-ring rounded-full bg-severity-red-500" />
+        <p className="font-mono text-[0.625rem] uppercase tracking-widest text-severity-red-400">
+          Critical · Flood
+        </p>
+      </div>
+      <p className="mt-3 text-sm font-bold text-white">Water rising in Kankarbagh</p>
+      <p className="mt-1 text-xs text-[var(--dl-text-on-navy)]">
+        Evacuate now · Safe routes below
+      </p>
+      <div className="mt-3 flex gap-1.5">
+        <span className="rounded-md bg-severity-red-500/20 px-2 py-1 font-mono text-[0.625rem] text-severity-red-300">
+          ALERT
+        </span>
+        <span className="rounded-md bg-white/10 px-2 py-1 font-mono text-[0.625rem] text-[var(--dl-text-on-navy)]">
+          09:41 IST
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function RouteIllustration() {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span
+        aria-hidden="true"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-2xl ring-1 ring-white/10"
+      >
+        🏠
+      </span>
+      <div className="relative mx-1 w-28">
+        <div className="h-0.5 w-full border-t-2 border-dashed border-[var(--dl-blue-light)]" />
+        <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--dl-blue-light)]" />
+      </div>
+      <span
+        aria-hidden="true"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dl-blue)]/25 text-2xl ring-1 ring-[var(--dl-blue)]/50"
+      >
+        ⛑️
+      </span>
+    </div>
+  );
+}
+
+function ShelterIllustration() {
+  return (
+    <div className="w-64 rounded-2xl border border-white/10 bg-[var(--dl-navy-2)]/80 p-4 text-left shadow-[var(--dl-shadow-soft)]">
+      <div className="flex items-center gap-3">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--dl-orange)]/20 text-xl ring-1 ring-[var(--dl-orange)]/40">
+          🏕️
+        </span>
+        <div>
+          <p className="text-sm font-bold text-white">Kankarbagh School</p>
+          <p className="text-xs text-[var(--dl-text-on-navy)]">400 m away · Beds open</p>
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-1.5">
+        <span className="h-2 w-2 animate-pulse-ring rounded-full bg-severity-green-500" />
+        <span className="font-mono text-[0.625rem] uppercase tracking-widest text-severity-green-400">
+          Shelter open
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function FamilyIllustration() {
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        aria-hidden="true"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dl-blue)]/20 text-2xl ring-1 ring-[var(--dl-blue)]/40"
+      >
+        👩‍🦰
+      </span>
+      <span aria-hidden="true" className="text-2xl">
+        💞
+      </span>
+      <span
+        aria-hidden="true"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dl-orange)]/20 text-2xl ring-1 ring-[var(--dl-orange)]/40"
+      >
+        👨‍🦱
+      </span>
+    </div>
+  );
+}
+
+const SLIDES: Slide[] = [
+  {
+    Icon: BellRing,
+    title: "Get real-time flood alerts",
+    description:
+      "Know the moment water levels turn dangerous. Life-safety alerts reach you and your family before the flood does.",
+    narration: {
+      en: "Get real time flood alerts. Know the moment water levels turn dangerous. Life safety alerts reach you and your family before the flood does.",
+      hi: "बाढ़ की चेतावनी तुरंत पाएं। पानी खतरनाक होने से पहले ही आपको और आपके परिवार को जीवन रक्षक सूचनाएं मिलती हैं।",
+    },
+    illustration: <AlertIllustration />,
+  },
+  {
+    Icon: Map,
+    title: "See safe evacuation routes",
+    description:
+      "Clear, verified routes out of your area — updated as roads close, so you never walk into danger.",
+    narration: {
+      en: "See safe evacuation routes. Clear, verified routes out of your area, updated as roads close, so you never walk into danger.",
+      hi: "अपने इलाके से निकलने के सुरक्षित रास्ते देखें। सड़कें बंद होने पर भी ये अपडेट होते रहते हैं, ताकि आप कभी खतरे की ओर न जाएं।",
+    },
+    illustration: <RouteIllustration />,
+  },
+  {
+    Icon: Tent,
+    title: "Find nearest shelter",
+    description:
+      "Locate the closest open shelter with live capacity — school, community hall or relief camp.",
+    narration: {
+      en: "Find nearest shelter. Locate the closest open shelter with live capacity, school, community hall or relief camp.",
+      hi: "अपने सबसे नज़दीकी खुले आश्रय स्थल का पता लगाएं — स्कूल, सामुदायिक भवन या राहत शिविर, खाली बिस्तरों की जानकारी के साथ।",
+    },
+    illustration: <ShelterIllustration />,
+  },
+  {
+    Icon: Users,
+    title: "Stay connected with family",
+    description:
+      "Add your family contacts so they're alerted and checked on, even when you can't reach them.",
+    narration: {
+      en: "Stay connected with family. Add your family contacts so they're alerted and checked on, even when you can't reach them.",
+      hi: "अपने परिवार के संपर्क जोड़ें ताकि आप उन तक न पहुंच पाने पर भी उन्हें सूचनाएं और सुरक्षा की जांच मिलती रहे।",
+    },
+    illustration: <FamilyIllustration />,
+  },
+];
+
+const contentVariants: Variants = {
+  hidden: { opacity: 0, y: 26 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+};
+
+export default function OnboardingPage() {
+  const router = useRouter();
+  const [index, setIndex] = useState(0);
+
+  const goNext = useCallback(
+    () => setIndex((i) => Math.min(i + 1, SLIDES.length - 1)),
+    [],
+  );
+  const goPrev = useCallback(() => setIndex((i) => Math.max(i - 1, 0)), []);
+
+  // Phase 13 · Step 7 — language-aware narration. `supported` gates the
+  // button (no dead controls on browsers without speechSynthesis).
+  const { language } = useTranslation();
+  const { speak, stop, speaking, supported } = useTextToSpeech();
+  const isHindi = language === "hi";
+  // The narration text is only ever Hindi (Devanagari) or English, so the
+  // voice must match the SPOKEN text — not the UI language. A Bengali UI
+  // still narrates English copy with an English voice; only Hindi gets the
+  // hi-IN voice (voiceLangForLocale("en") is undefined by design).
+  const voiceLang = isHindi ? voiceLangForLocale("hi") : undefined;
+
+  const narrationFor = useCallback(
+    (slide: Slide) => (isHindi ? slide.narration.hi : slide.narration.en),
+    [isHindi],
+  );
+
+  const toggleListen = useCallback(
+    (text: string) => {
+      if (speaking) {
+        stop();
+        return;
+      }
+      speak(text, voiceLang);
+    },
+    [speaking, speak, stop, voiceLang],
+  );
+
+  // Swiping/arrowing to another slide cuts off any in-flight narration.
+  useEffect(() => {
+    stop();
+  }, [index, stop]);
+
+  // Arrow-key navigation (desktop).
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowRight") goNext();
+      else if (e.key === "ArrowLeft") goPrev();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [goNext, goPrev]);
+
+  const goToDashboard = () => router.push(NEXT_URL);
+  const isLast = index === SLIDES.length - 1;
+
+  return (
+    <main className="landing-page relative h-[100dvh] overflow-hidden bg-[var(--dl-navy)]">
+      {/* Ambient glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_80%_-10%,rgba(249,115,22,0.16),transparent),radial-gradient(ellipse_50%_40%_at_0%_110%,rgba(37,99,235,0.18),transparent)]"
+      />
+
+      {/* Top bar — progress + Skip */}
+      <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-4">
+        <p className="font-mono text-xs uppercase tracking-widest text-[var(--dl-text-muted)]">
+          {index + 1} / {SLIDES.length}
+        </p>
+        {!isLast ? (
+          <button
+            type="button"
+            onClick={goToDashboard}
+            className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-[var(--dl-text-on-navy)] transition hover:border-[var(--dl-orange)]/50 hover:text-white"
+          >
+            Skip
+          </button>
+        ) : (
+          <span className="w-16" />
+        )}
+      </header>
+
+      {/* Carousel track */}
+      <div className="h-full" role="group" aria-roledescription="carousel" aria-label="What the Citizen App offers">
+        {/* MotionConfig reducedMotion="user" keeps the animations respectful
+            of prefers-reduced-motion while leaving full motion for everyone
+            else. */}
+        <MotionConfig reducedMotion="user">
+          <motion.div
+            className="flex h-full"
+            animate={{ x: `-${index * 100}%` }}
+            transition={{ type: "spring", stiffness: 320, damping: 34 }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            // Snap back to the animate-set position when a swipe is aborted
+            // below the threshold (drag + animate share the same motion value).
+            dragSnapToOrigin
+            dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              const { offset, velocity } = info;
+              if (offset.x < -60 || velocity.x < -400) goNext();
+              else if (offset.x > 60 || velocity.x > 400) goPrev();
+            }}
+            style={{ touchAction: "pan-y" }}
+          >
+          {SLIDES.map((slide, i) => {
+            const isActive = i === index;
+            return (
+              <section
+                key={slide.title}
+                aria-label={`Slide ${i + 1}: ${slide.title}`}
+                className="h-full w-full shrink-0 overflow-y-auto"
+              >
+                {/* my-auto centers when there's room and lets the page scroll
+                    naturally when the slide overflows a short viewport. */}
+                <div className="my-auto flex min-h-full w-full flex-col items-center px-6 py-20 text-center">
+                  <motion.div
+                    variants={contentVariants}
+                    initial="hidden"
+                    animate={isActive ? "show" : "hidden"}
+                    className="flex flex-col items-center"
+                  >
+                    {/* Slide illustration */}
+                    <div className="relative">
+                      <span
+                        aria-hidden="true"
+                        className="absolute -inset-6 rounded-full bg-white/5 blur-2xl"
+                      />
+                      {slide.illustration}
+                    </div>
+
+                    <span
+                      aria-hidden="true"
+                      className="mt-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--dl-orange)]/15 text-white ring-1 ring-[var(--dl-orange)]/30"
+                    >
+                      <slide.Icon className="h-8 w-8" strokeWidth={1.8} />
+                    </span>
+                    <h1 className="mt-5 max-w-sm text-3xl font-bold tracking-tight text-white">
+                      {slide.title}
+                    </h1>
+                    <p className="mt-3 max-w-sm text-sm leading-relaxed text-[var(--dl-text-on-navy)]">
+                      {slide.description}
+                    </p>
+
+                    {/* Phase 13 · Step 7 — massive "Tap to Listen" narration
+                        button. Reads the slide aloud in the preferred
+                        language (Hindi when the app is in Hindi, otherwise
+                        English); flips to a pulsing Stop state while
+                        speaking. */}
+                    {supported && (
+                    <button
+                      type="button"
+                      onClick={() => toggleListen(narrationFor(slide))}
+                      aria-pressed={speaking}
+                      aria-label={speaking ? "Stop narration" : "Listen to this slide"}
+                      className={`mt-8 flex items-center gap-3.5 rounded-full py-2.5 pl-2.5 pr-6 transition-all duration-300 ${
+                        speaking
+                          ? "bg-white/10 text-white ring-2 ring-[var(--dl-orange)]"
+                          : "bg-[var(--dl-orange)] text-white shadow-[0_10px_32px_rgba(234,88,12,0.4)] hover:bg-[#EA5B0C] hover:shadow-[0_12px_38px_rgba(234,88,12,0.5)]"
+                      }`}
+                    >
+                      <span
+                        className={`relative flex h-12 w-12 items-center justify-center rounded-full ${
+                          speaking ? "bg-[var(--dl-orange)]/25" : "bg-white/20"
+                        }`}
+                      >
+                        {speaking && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute inset-0 animate-ping rounded-full bg-[var(--dl-orange)]/40 motion-reduce:animate-none"
+                          />
+                        )}
+                        {speaking ? (
+                          <VolumeX className="h-6 w-6" aria-hidden="true" />
+                        ) : (
+                          <Volume2 className="h-6 w-6" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span className="text-left">
+                        <span className="block text-base font-bold leading-tight">
+                          {speaking ? "Speaking…" : "Tap to Listen"}
+                        </span>
+                        <span className="block text-[0.6875rem] font-medium opacity-80">
+                          {speaking
+                            ? "Tap to stop"
+                            : isHindi
+                              ? "हिन्दी में सुनें"
+                              : "Listen in your language"}
+                        </span>
+                      </span>
+                    </button>
+                    )}
+
+                    {i === 0 && (
+                      <p className="mt-8 font-mono text-[0.6875rem] uppercase tracking-widest text-[var(--dl-text-muted)]">
+                        ← Swipe to explore →
+                      </p>
+                    )}
+                  </motion.div>
+                </div>
+              </section>
+            );
+          })}
+          </motion.div>
+        </MotionConfig>
+      </div>
+
+      {/* Desktop arrow keys */}
+      <button
+        type="button"
+        onClick={goPrev}
+        aria-label="Previous slide"
+        disabled={index === 0}
+        className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full border border-white/10 bg-white/5 p-2.5 text-white transition hover:border-[var(--dl-orange)]/50 disabled:opacity-30 md:block"
+      >
+        <ChevronLeft aria-hidden="true" className="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        onClick={goNext}
+        aria-label="Next slide"
+        disabled={isLast}
+        className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full border border-white/10 bg-white/5 p-2.5 text-white transition hover:border-[var(--dl-orange)]/50 disabled:opacity-30 md:block"
+      >
+        <ChevronRight aria-hidden="true" className="h-5 w-5" />
+      </button>
+
+      {/* Bottom — dots + CTA */}
+      <footer className="absolute inset-x-0 bottom-0 z-20 pb-8">
+        <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 px-6">
+          <div className="flex items-center gap-2" role="tablist" aria-label="Onboarding slides">
+          {SLIDES.map((slide, i) => (
+            <button
+              key={slide.title}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-current={i === index ? "step" : undefined}
+              aria-label={`Go to slide ${i + 1}: ${slide.title}`}
+              className={`h-2.5 rounded-full transition-all duration-300 ${
+                i === index ? "w-8 bg-[var(--dl-orange)]" : "w-2.5 bg-white/20 hover:bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+
+          {isLast ? (
+            <button
+              type="button"
+              onClick={goToDashboard}
+              className="flex w-full items-center justify-center gap-2 rounded-[var(--dl-radius-sm)] bg-[var(--dl-orange)] px-4 py-3.5 text-base font-bold text-white transition hover:bg-[#EA5B0C]"
+            >
+              Continue to Dashboard
+              <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={goNext}
+              className="flex w-full items-center justify-center gap-2 rounded-[var(--dl-radius-sm)] border border-[var(--dl-orange)]/40 bg-[var(--dl-orange)]/10 px-4 py-3.5 text-base font-semibold text-[var(--dl-orange-light)] transition hover:border-[var(--dl-orange)] hover:bg-[var(--dl-orange)]/20"
+            >
+              Next
+              <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </footer>
+    </main>
+  );
+}

@@ -1,0 +1,1648 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* =====================================================================
+       ROADMAP DESIGN SYSTEM (UI/UX Phase 1 · Step 1) — "Discord-meets-FEMA"
+       dark-first emergency palette. These tokens are exposed to Tailwind as
+       bg-primary / text-secondary / bg-severity-critical / … utilities and
+       are meant for the new design-system components (sidebar, bottom nav,
+       dashboard widgets, StatCards, …).
+
+       NOTE (Hybrid decision): the legacy EOC palette below is kept intact so
+       the ~150 existing components keep working unchanged. New UI should
+       prefer the roadmap tokens; legacy tokens stay for the old surfaces.
+       ===================================================================== */
+
+    /* Backgrounds — deep navy scale */
+    --bg-primary: #0a0f1a;
+    --bg-secondary: #111827;
+    --bg-tertiary: #1e293b;
+
+    /* Accents — emergency blue + status colors */
+    --accent-primary: #3b82f6;
+    --accent-danger: #ef4444;
+    --accent-warning: #f59e0b;
+    --accent-success: #10b981;
+    --accent-purple: #8b5cf6;
+
+    /* Text — slate scale */
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    /* Borders */
+    --border-subtle: #1e293b;
+    --border-active: #3b82f6;
+
+    /* Severity background tints — SeverityConfig primary colors.
+       These are the canonical 4-level severity colors used across the app:
+       SAFE = emerald-500, WATCH = amber-500, WARNING = orange-500, CRITICAL = red-500 */
+    --severity-critical: #ef4444;
+    --severity-warning: #f97316;
+    --severity-watch: #f59e0b;
+    --severity-safe: #10b981;
+
+    /* =========================================================================
+       LAYOUT CONSTANTS — 8px Grid System
+       -----------------------------------------------------------------------
+       Fixed dimensions used across the app shell. These MUST be consistent
+       everywhere. Use var(--layout-*) in CSS or import from styles/tokens.ts.
+       ========================================================================= */
+    --layout-topbar: 56px;        /* DashboardTopBar — h-14 */
+    --layout-sidebar: 260px;      /* Sidebar expanded — w-[260px] */
+    --layout-sidebar-collapsed: 64px; /* Sidebar collapsed — w-16 */
+    --layout-bottomnav: 72px;     /* Bottom navigation — h-[72px] */
+
+    /* Dashboard grid gap scale (8px base) */
+    --gap-mobile: 16px;           /* 1 col, gap-4 */
+    --gap-tablet: 20px;           /* 2 col, gap-5 */
+    --gap-desktop: 24px;          /* 3-4 col, gap-6 */
+    --gap-wide: 24px;             /* 4 col, gap-6 */
+
+    /* Radii — buttons 6 / cards 10 / modals 14 / floating 18 */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+
+    /* Extended radius scale — the audit found arbitrary rounded-[Npx] values
+       (2/12/16/20/22/26) used verbatim across the admin/gov consoles.
+       Display radii are exposed as vars only (Tailwind's rounded-2xl/3xl/4xl
+       stay at their stock 16/24/32px so existing components don't shift). */
+    --radius-xl2: 22px;
+    --radius-xl3: 26px;
+    --radius-xl4: 12px;
+    --radius-xl5: 16px;
+    --radius-xl6: 20px;
+    --radius-micro: 2px;
+    --radius-eoc: 0.625rem;
+    --radius-chat: 4px;
+    --radius-pill: 9999px;
+
+    /* Shadows & glows */
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    --glow-blue: 0 0 20px rgba(59, 130, 246, 0.3);
+    --glow-red: 0 0 20px rgba(239, 68, 68, 0.3);
+    --glow-amber: 0 0 20px rgba(245, 158, 11, 0.3);
+    --glow-purple: 0 0 20px rgba(168, 85, 247, 0.28);
+
+    /* Floating elevation shadows — consolidated from the arbitrary
+       shadow-[...] values the audit found repeated verbatim (styles/tokens.ts
+       → shadows.floating). */
+    --shadow-float-sm: 0 2px 12px rgba(0, 0, 0, 0.25);
+    --shadow-float-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-float-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-float-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
+    --shadow-float-xxl: 0 20px 60px rgba(0, 0, 0, 0.6);
+    --shadow-float-sheet: 0 -12px 48px rgba(0, 0, 0, 0.6);
+
+    /* SafeSphere brand palette — global twins of the .landing-page scoped
+       --navy/--blue/--orange set (styles/tokens.ts → colors.brand). Landing
+       components keep using the scoped names so high-contrast can neutralize
+       them; every other surface uses these. */
+    --brand-navy: #0b1f3a;
+    --brand-navy-2: #0f2a4f;
+    --brand-navy-3: #132f57;
+    --brand-blue: #2563eb;
+    --brand-blue-light: #5b8df6;
+    --brand-orange: #f97316;
+    --brand-orange-light: #fdba74;
+    --brand-white: #ffffff;
+    --brand-gray: #f8fafc;
+    --brand-gray-2: #e7ecf3;
+    --brand-text-dark: #0f1b2d;
+    --brand-text-muted: #5b6b84;
+    --brand-text-on-navy: #c9d6ec;
+
+    /* Brand RGB channels — for opacity modifiers on brand utilities */
+    --brand-navy-rgb: 11 31 58;
+    --brand-navy-2-rgb: 15 42 79;
+    --brand-navy-3-rgb: 19 47 87;
+    --brand-blue-rgb: 37 99 235;
+    --brand-blue-light-rgb: 91 141 246;
+    --brand-orange-rgb: 249 115 22;
+    --brand-orange-light-rgb: 253 186 116;
+    --brand-white-rgb: 255 255 255;
+    --brand-gray-rgb: 248 250 252;
+    --brand-gray-2-rgb: 231 236 243;
+    --brand-text-dark-rgb: 15 27 45;
+    --brand-text-muted-rgb: 91 107 132;
+    --brand-text-on-navy-rgb: 201 214 236;
+
+    /* Skeleton shimmer — dark slate scale (slate-800 base / slate-700
+       shine). Feeds .skeleton-shimmer in @layer components. */
+    --skeleton-base: #1e293b;
+    --skeleton-shine: #334155;
+
+    /* =====================================================================
+       LEGACY EOC PALETTE — deep navy/slate, not pure black.
+       Kept for backward compatibility; --background/--foreground are aliased
+       to the roadmap tokens so the page shell and new components agree.
+       ===================================================================== */
+    --background: var(--bg-primary);
+    --foreground: var(--text-primary);
+
+    --surface: #0f1d38;
+    --surface-elevated: #17294d;
+    --surface-muted: #0c1830;
+
+    --border: #1e3056;
+    --border-strong: #2c3f6d;
+
+    --accent: #38bdf8;
+    --accent-soft: rgba(56, 189, 248, 0.16);
+
+    /* Severity scale — safe/low risk */
+    --severity-green-300: #6ee7b7;
+    --severity-green-400: #34d399;
+    --severity-green-500: #10b981;
+    --severity-green-600: #059669;
+
+    /* Severity scale — watch/medium risk */
+    --severity-amber-300: #fcd34d;
+    --severity-amber-400: #fbbf24;
+    --severity-amber-500: #f59e0b;
+    --severity-amber-600: #d97706;
+
+    /* Severity scale — warning/high risk */
+    --severity-red-300: #fca5a5;
+    --severity-red-400: #f87171;
+    --severity-red-500: #ef4444;
+    --severity-red-600: #dc2626;
+
+    /* Severity scale — critical/evacuate */
+    --severity-purple-300: #d8b4fe;
+    --severity-purple-400: #c084fc;
+    --severity-purple-500: #a855f7;
+    --severity-purple-600: #9333ea;
+
+    /* =====================================================================
+       RGB CHANNEL VARIABLES — Tailwind opacity modifiers.
+
+       Tailwind v3 only generates `bg-accent/10`-style opacity utilities
+       when the theme color is expressed as `rgb(var(--x-rgb) / <alpha>)`.
+       These channel vars feed that pattern (see tailwind.config.ts). The
+       hex vars above stay for direct `var(--x)` use in plain CSS.
+       ===================================================================== */
+    --bg-primary-rgb: 10 15 26;
+    --bg-secondary-rgb: 17 24 39;
+    --bg-tertiary-rgb: 30 41 59;
+
+    --accent-primary-rgb: 59 130 246;
+    --accent-danger-rgb: 239 68 68;
+    --accent-warning-rgb: 245 158 11;
+    --accent-success-rgb: 16 185 129;
+    --accent-purple-rgb: 139 92 246;
+
+    --text-primary-rgb: 241 245 249;
+    --text-secondary-rgb: 148 163 184;
+    --text-muted-rgb: 100 116 139;
+
+    --border-subtle-rgb: 30 41 59;
+    --border-active-rgb: 59 130 246;
+
+    --severity-critical-rgb: 239 68 68;
+    --severity-warning-rgb: 249 115 22;
+    --severity-watch-rgb: 245 158 11;
+    --severity-safe-rgb: 16 185 129;
+
+    --severity-green-300-rgb: 110 231 183;
+    --severity-green-400-rgb: 52 211 153;
+    --severity-green-500-rgb: 16 185 129;
+    --severity-green-600-rgb: 5 150 105;
+
+    --severity-amber-300-rgb: 252 211 77;
+    --severity-amber-400-rgb: 251 191 36;
+    --severity-amber-500-rgb: 245 158 11;
+    --severity-amber-600-rgb: 217 119 6;
+
+    --severity-red-300-rgb: 252 165 165;
+    --severity-red-400-rgb: 248 113 113;
+    --severity-red-500-rgb: 239 68 68;
+    --severity-red-600-rgb: 220 38 38;
+
+    --severity-purple-300-rgb: 216 180 254;
+    --severity-purple-400-rgb: 192 132 252;
+    --severity-purple-500-rgb: 168 85 247;
+    --severity-purple-600-rgb: 147 51 234;
+
+    --accent-rgb: 56 189 248;
+    --surface-rgb: 15 29 56;
+    --surface-elevated-rgb: 23 41 77;
+    --surface-muted-rgb: 12 24 48;
+    --border-rgb: 30 48 86;
+    --border-strong-rgb: 44 63 109;
+    --background-rgb: 10 15 26;
+    --foreground-rgb: 241 245 249;
+
+    /* ---------------------------------------------------------------
+       SHADCN/UI SEMANTIC TOKENS (dark-first) — aliased to the roadmap
+       palette so shadcn components re-theme with the app. RGB channel
+       variants follow the same `rgb(var(--x-rgb) / <alpha-value>)`
+       pattern for working opacity modifiers (bg-primary/90, …).
+       --------------------------------------------------------------- */
+    --card: #0f1d38;
+    --card-foreground: #f1f5f9;
+    --popover: #17294d;
+    --popover-foreground: #f1f5f9;
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b;
+    --secondary-foreground: #f1f5f9;
+    --muted: #111827;
+    --muted-foreground: #64748b;
+    --accent-foreground: #f1f5f9;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --input: #1e3056;
+    --ring: #3b82f6;
+
+    --card-rgb: 15 29 56;
+    --card-foreground-rgb: 241 245 249;
+    --popover-rgb: 23 41 77;
+    --popover-foreground-rgb: 241 245 249;
+    --primary-rgb: 59 130 246;
+    --primary-foreground-rgb: 255 255 255;
+    --secondary-rgb: 30 41 59;
+    --secondary-foreground-rgb: 241 245 249;
+    --muted-rgb: 17 24 39;
+    --muted-foreground-rgb: 100 116 139;
+    --accent-foreground-rgb: 241 245 249;
+    --destructive-rgb: 239 68 68;
+    --destructive-foreground-rgb: 255 255 255;
+    --input-rgb: 30 48 86;
+    --ring-rgb: 59 130 246;
+
+    /* Panel family — admin/ops-console dark surfaces (styles/tokens.ts →
+       colors.panel). Previously scattered hexes #0b1120 / #0d1526 / #1c2740
+       / #2c3f6d / #020617 / #131b30 / #1a2338 / #2a3a5c / #151d31 / #1a2740. */
+    --panel: #0b1120;
+    --panel-deep: #0d1526;
+    --panel-darker: #020617;
+    --panel-hover: #131b30;
+    --panel-hover-alt: #1a2338;
+    --panel-border: #1c2740;
+    --panel-border-strong: #2a3a5c;
+    --panel-border-hover: #2c3f6d;
+    --panel-divide: #151d31;
+    --panel-chip: #1a2740;
+
+    --panel-rgb: 11 17 32;
+    --panel-deep-rgb: 13 21 38;
+    --panel-darker-rgb: 2 6 23;
+    --panel-hover-rgb: 19 27 48;
+    --panel-hover-alt-rgb: 26 35 56;
+    --panel-border-rgb: 28 39 64;
+    --panel-border-strong-rgb: 42 58 92;
+    --panel-border-hover-rgb: 44 63 109;
+    --panel-divide-rgb: 21 29 49;
+    --panel-chip-rgb: 26 39 64;
+  }
+
+  /*
+   * Light "day ops" palette — active whenever next-themes removes the `dark`
+   * class from <html>. The roadmap tokens get light values too so new
+   * components built on bg-primary / text-primary also re-theme correctly.
+   */
+  :root:not(.dark) {
+    --bg-primary: #f2f6fc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e9eff8;
+
+    --accent-primary: #2563eb;
+    --accent-danger: #dc2626;
+    --accent-warning: #d97706;
+    --accent-success: #059669;
+    --accent-purple: #7c3aed;
+
+    --text-primary: #101b2e;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+
+    --border-subtle: #d4deef;
+    --border-active: #2563eb;
+
+    /* Light-mode severity tints: soft pastels that read well with the dark
+       slate text tokens above (dark mode keeps the deep tints). */
+    --severity-critical: #fecaca;
+    --severity-warning: #fed7aa;
+    --severity-watch: #fef3c7;
+    --severity-safe: #d1fae5;
+
+    --background: var(--bg-primary);
+    --foreground: var(--text-primary);
+
+    --surface: #ffffff;
+    --surface-elevated: #e9eff8;
+    --surface-muted: #dfe8f4;
+
+    --border: #d4deef;
+    --border-strong: #b4c3db;
+
+    --accent: #0284c7;
+    --accent-soft: rgba(2, 132, 199, 0.12);
+
+    /* Skeleton shimmer — light slate scale (slate-200 base / slate-100
+       shine) so loading blocks read correctly on the white day-ops cards. */
+    --skeleton-base: #e2e8f0;
+    --skeleton-shine: #f1f5f9;
+
+    /* Light "day ops" RGB channels (severity scales keep the dark values). */
+    --bg-primary-rgb: 242 246 252;
+    --bg-secondary-rgb: 255 255 255;
+    --bg-tertiary-rgb: 233 239 248;
+
+    --accent-primary-rgb: 37 99 235;
+    --accent-danger-rgb: 220 38 38;
+    --accent-warning-rgb: 217 119 6;
+    --accent-success-rgb: 5 150 105;
+    --accent-purple-rgb: 124 58 237;
+
+    --text-primary-rgb: 16 27 46;
+    --text-secondary-rgb: 71 85 105;
+    --text-muted-rgb: 148 163 184;
+
+    --border-subtle-rgb: 212 222 239;
+    --border-active-rgb: 37 99 235;
+
+    --severity-critical-rgb: 254 202 202;
+    --severity-warning-rgb: 254 215 170;
+    --severity-watch-rgb: 254 243 199;
+    --severity-safe-rgb: 209 250 229;
+
+    --accent-rgb: 2 132 199;
+    --surface-rgb: 255 255 255;
+    --surface-elevated-rgb: 233 239 248;
+    --surface-muted-rgb: 223 232 244;
+    --border-rgb: 212 222 239;
+    --border-strong-rgb: 180 195 219;
+    --background-rgb: 242 246 252;
+    --foreground-rgb: 16 27 46;
+
+    /* SHADCN/UI SEMANTIC TOKENS (light "day ops") */
+    --card: #ffffff;
+    --card-foreground: #101b2e;
+    --popover: #ffffff;
+    --popover-foreground: #101b2e;
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+    --secondary: #e9eff8;
+    --secondary-foreground: #101b2e;
+    --muted: #e9eff8;
+    --muted-foreground: #64748b;
+    --accent-foreground: #101b2e;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    --input: #d4deef;
+    --ring: #2563eb;
+
+    --card-rgb: 255 255 255;
+    --card-foreground-rgb: 16 27 46;
+    --popover-rgb: 255 255 255;
+    --popover-foreground-rgb: 16 27 46;
+    --primary-rgb: 37 99 235;
+    --primary-foreground-rgb: 255 255 255;
+    --secondary-rgb: 233 239 248;
+    --secondary-foreground-rgb: 16 27 46;
+    --muted-rgb: 233 239 248;
+    --muted-foreground-rgb: 100 116 139;
+    --accent-foreground-rgb: 16 27 46;
+    --destructive-rgb: 220 38 38;
+    --destructive-foreground-rgb: 255 255 255;
+    --input-rgb: 212 222 239;
+    --ring-rgb: 37 99 235;
+
+    color-scheme: light;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    background-image:
+      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(56, 189, 248, 0.08), transparent),
+      radial-gradient(ellipse 60% 50% at 100% 0%, rgba(168, 85, 247, 0.06), transparent);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    font-family:
+      var(--font-sans),
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+  }
+
+  /* ===================================================================
+     A11y (Phase 13 · Step 10): keep the root font at the user's default.
+     Every text size below is rem-based (Tailwind's scale + the rem
+     conversions across the citizen surface), so OS-level font-size
+     preferences scale the whole app.
+     =================================================================== */
+  html {
+    font-size: 100%;
+  }
+
+  /* Slim EOC-style scrollbars */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--surface-muted);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 9999px;
+    border: 2px solid var(--surface-muted);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   UI/UX Phase 9 · Step 1 — global touch-target sizing.
+   Every tappable control gets a minimum 48px hit area on coarse pointer
+   devices (mobile field responders). `min-height` only enlarges — compact
+   buttons are lifted up to the safe target, dense table rows stay dense
+   (they are scroll/selection targets, not taps). Fine pointers (mouse) are
+   unaffected.
+   --------------------------------------------------------------------- */
+@media (pointer: coarse) {
+  button,
+  a[href],
+  [role="button"],
+  [role="menuitem"],
+  [role="option"],
+  select {
+    min-height: 48px;
+  }
+
+  input,
+  [role="checkbox"],
+  [role="switch"] {
+    min-height: 44px;
+  }
+}
+
+@layer components {
+  /* Reusable EOC panel/card */
+  .eoc-panel {
+    @apply rounded-eoc border border-solid bg-surface;
+  }
+
+  /* Monospace "system readout" label — JetBrains Mono for data.
+     rem (0.6875rem = 11px at the default root) so it scales with the
+     user's OS font-size (Phase 13 · Step 10). */
+  .eoc-label {
+    @apply font-mono text-[0.6875rem] uppercase tracking-widest text-slate-400;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Critical-alert banner: pulsing red glow */
+  @keyframes alert-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+    }
+    50% {
+      box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+    }
+  }
+  .animate-alert-pulse {
+    animation: alert-pulse 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Critical-alert map edge flash — 3s burst, then auto-clears */
+  @keyframes map-alert-flash {
+    0% {
+      opacity: 1;
+      box-shadow: inset 0 0 0 10px rgba(239, 68, 68, 0.9);
+    }
+    50% {
+      opacity: 0.35;
+      box-shadow: inset 0 0 0 22px rgba(239, 68, 68, 0.65);
+    }
+    100% {
+      opacity: 1;
+      box-shadow: inset 0 0 0 10px rgba(239, 68, 68, 0.9);
+    }
+  }
+  .animate-map-alert-flash {
+    animation: map-alert-flash 0.3s cubic-bezier(0.4, 0, 0.6, 1) 10;
+  }
+  .map-alert-flash-ring {
+    box-shadow: inset 0 0 0 10px rgba(239, 68, 68, 0.9);
+  }
+
+  /* Phase 9 · Step 2 — AI Agent "Thinking" glow. Applied to AgentCard
+     while an agent is working: a pulsing 1→2px ring plus a soft outer
+     glow. The accent color comes from the inline --agent-accent-rgb CSS
+     var each card sets (e.g. "59 130 246"), so every agent's accent
+     drives its own animation. */
+  @keyframes agent-think-glow {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 1px rgba(var(--agent-accent-rgb, 139 92 246) / 0.55),
+        0 0 14px rgba(var(--agent-accent-rgb, 139 92 246) / 0.2);
+    }
+    50% {
+      box-shadow:
+        0 0 0 2px rgba(var(--agent-accent-rgb, 139 92 246) / 0.9),
+        0 0 30px rgba(var(--agent-accent-rgb, 139 92 246) / 0.5);
+    }
+  }
+  .agent-thinking-glow {
+    animation: agent-think-glow 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .agent-thinking-glow {
+      animation: none;
+      box-shadow: 0 0 0 1px rgba(var(--agent-accent-rgb, 139 92 246) / 0.55);
+    }
+  }
+
+  /* Phase 9 · Step 3 — Orchestration pipeline connectors. Animated
+     marching-dash line + arrowhead joining agent cards in the swarm
+     pipeline (OrchestrationFlow). */
+  .flow-connector {
+    display: flex;
+    align-items: center;
+    width: 20px;
+  }
+  .flow-connector-line {
+    flex: 1;
+    height: 2px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(168, 85, 247, 0.75) 0 4px,
+      transparent 4px 8px
+    );
+    background-size: 8px 2px;
+    animation: flow-dash 0.5s linear infinite;
+  }
+  .flow-connector-arrow {
+    width: 0;
+    height: 0;
+    margin-left: -2px;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 6px solid rgba(168, 85, 247, 0.85);
+  }
+  @keyframes flow-dash {
+    to {
+      background-position: 8px 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flow-connector-line {
+      animation: none;
+    }
+  }
+
+  /* SkeletonLoader shimmer (UI Phase 1 · Step 6) — a continuous horizontal
+     sweep of a slate gradient: base → shine → base. Colors come from
+     --skeleton-base/--skeleton-shine (slate-800/slate-700 dark, slate-200/
+     slate-100 light "day ops"), so the block re-themes automatically. */
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  .skeleton-shimmer {
+    background-image: linear-gradient(
+      to right,
+      var(--skeleton-base, #1e293b) 40%,
+      var(--skeleton-shine, #334155) 50%,
+      var(--skeleton-base, #1e293b) 60%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer {
+      animation: none;
+      background-image: none;
+      background-color: var(--skeleton-base, #1e293b);
+    }
+  }
+
+  /* Toast progress bar (UI Phase 1 · Step 7) — shrinks across the toast's
+     auto-dismiss duration; pauses on hover/focus so long messages stay
+     readable. Note: the pause is visual only — the react-hot-toast
+     auto-dismiss timer keeps running. Duration is set inline per toast
+     (animation-duration). */
+  @keyframes toast-progress {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
+  }
+  .toast-progress {
+    animation-name: toast-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    animation-duration: 5s;
+  }
+  .toast:hover .toast-progress,
+  .toast:focus-within .toast-progress {
+    animation-play-state: paused;
+  }
+
+  /* SOS FAB critical glow — red box-shadow pulsing 2s infinite */
+  @keyframes sos-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(239, 68, 68, 0), 0 0 40px rgba(239, 68, 68, 0.15);
+    }
+  }
+  .animate-sos-glow {
+    animation: sos-glow 2s ease-in-out infinite;
+  }
+
+  /* Severity badge pulse — gentle scale + opacity for active alerts */
+  @keyframes severity-pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.05);
+    }
+  }
+  .animate-severity-pulse {
+    animation: severity-pulse 2s ease-in-out infinite;
+  }
+
+  /* AI thinking shimmer — gradient sweep across text */
+  @keyframes ai-thinking-shimmer {
+    0% {
+      background-position: -200% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+  .animate-ai-thinking {
+    background: linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.3) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: ai-thinking-shimmer 2s linear infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  /* Icon bounce — on action completion */
+  @keyframes icon-bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.25); }
+    50% { transform: scale(0.95); }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .animate-icon-bounce {
+    animation: icon-bounce 0.5s ease-in-out;
+  }
+
+  /* Icon rotate — on action completion */
+  @keyframes icon-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .animate-icon-spin {
+    animation: icon-spin 0.6s ease-in-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast-progress {
+      animation: none;
+    }
+    .animate-sos-glow,
+    .animate-severity-pulse,
+    .animate-ai-thinking,
+    .animate-icon-bounce,
+    .animate-icon-spin {
+      animation: none;
+    }
+  }
+
+  /* ToastViewport positioning is handled in JS — the position prop flips
+     to top-center on mobile via matchMedia in components/ui/Toast.tsx
+     (per-toast wrappers are absolutely positioned with inline styles, so
+     CSS overrides can't relocate them reliably). No container CSS needed. */
+}
+
+/* ---------------------------------------------------------------------
+   ROADMAP UTILITIES (UI/UX Phase 1 · Step 2)
+   Hand-written because a Tailwind color named `bg`/`text`/`border` would
+   generate `bg-bg-primary` instead of `bg-primary`. These mirror the
+   roadmap tokens 1:1 and re-theme automatically with the light "day ops"
+   palette since they read the CSS variables.
+
+   NOTE: deliberately written as plain top-level CSS (NOT inside
+   `@layer utilities`) — Tailwind v3.4 drops the contents of a native
+   `@layer utilities` block placed after the `@tailwind` directives, while
+   plain rules are always passed through verbatim (see the MapLibre
+   overrides below). Placed last in the file so they win source-order ties
+   against generated utilities.
+   --------------------------------------------------------------------- */
+.bg-primary {
+  background-color: var(--bg-primary);
+}
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
+.bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+.text-muted {
+  color: var(--text-muted);
+}
+
+.border-subtle {
+  border-color: var(--border-subtle);
+}
+.border-active {
+  border-color: var(--border-active);
+}
+
+/* Roadmap soft outer glows. Suffixed with `-soft` so they can't be
+   confused with the legacy shadow-glow-red/amber utilities (ring+glow
+   combos with different values). */
+.glow-blue-soft {
+  box-shadow: var(--glow-blue);
+}
+.glow-red-soft {
+  box-shadow: var(--glow-red);
+}
+.glow-amber-soft {
+  box-shadow: var(--glow-amber);
+}
+.glow-purple-soft {
+  box-shadow: var(--glow-purple);
+}
+
+/* ---------------------------------------------------------------------
+   TYPOGRAPHY SCALE UTILITIES (Phase 1 · Prompt 1.2)
+   Named utilities that replace the 240+ arbitrary text-[Xpx] and
+   text-[Xrem] values scattered across the codebase. These use rem
+   values so they scale with the user's OS font-size preference.
+   --------------------------------------------------------------------- */
+.text-eoc-label {
+  font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.6875rem; /* 11px */
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.text-eoc-tiny {
+  font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.625rem; /* 10px */
+  line-height: 1.5;
+}
+.text-display {
+  font-family: var(--font-display), "Poppins", var(--font-sans), sans-serif;
+}
+
+/* =====================================================================
+   HIGH CONTRAST MODE (Phase 13 · Step 10 · Strict Accessibility)
+   ---------------------------------------------------------------------
+   html.high-contrast is toggled by HighContrastContext (Settings →
+   High Contrast Mode). It overrides the ROADMAP tokens (--bg-primary /
+   --text-primary — the exact names the step spec calls out) to PURE
+   black-on-white, re-maps the legacy --dl-* navy tokens the citizen and
+   landing surfaces consume, strips decorative gradients (ambient glows,
+   gradient card fills, the body's radial wash) and raises subtle borders
+   to clearly visible white. Severity colors are kept — red/amber/green
+   carry meaning — but their tints now ride on the pure black surface.
+   ===================================================================== */
+/* The :root:not(.dark) light "day ops" palette (0,2,0) outranks a bare
+   html.high-contrast (0,1,1), so the token block below also matches via
+   :root:not(.dark).high-contrast (0,3,0) — every palette state (dark
+   class on or off) resolves to pure black-on-white. */
+html.high-contrast,
+:root:not(.dark).high-contrast {
+  color-scheme: dark;
+
+  /* Roadmap tokens — the spec's exact overrides. */
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --bg-tertiary: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #e5e7eb;
+  --border-subtle: #ffffff;
+  --border-active: #ffffff;
+
+  /* RGB channel twins so /opacity utilities (bg-primary/90 …) work too. */
+  --bg-primary-rgb: 0 0 0;
+  --bg-secondary-rgb: 0 0 0;
+  --bg-tertiary-rgb: 0 0 0;
+  --text-primary-rgb: 255 255 255;
+  --text-secondary-rgb: 255 255 255;
+  --text-muted-rgb: 229 231 235;
+  --border-subtle-rgb: 255 255 255;
+  --border-active-rgb: 255 255 255;
+
+  /* Aliased surfaces (shadcn + legacy shell). */
+  --background: #000000;
+  --foreground: #ffffff;
+  --surface: #000000;
+  --surface-elevated: #000000;
+  --surface-muted: #000000;
+  --border: #ffffff;
+  --border-strong: #ffffff;
+  --card: #000000;
+  --card-foreground: #ffffff;
+  --popover: #000000;
+  --popover-foreground: #ffffff;
+  --muted: #000000;
+  --muted-foreground: #e5e7eb;
+  --input: #ffffff;
+  --ring: #ffffff;
+
+  /* Shadows and glows are decorative — removed for clarity. */
+  --shadow-card: none;
+  --shadow-modal: none;
+  --glow-blue: none;
+  --glow-red: none;
+  --glow-amber: none;
+  --glow-purple: none;
+}
+
+/* The legacy --dl-* tokens are scoped to .landing-page; this needs the
+   extra class to win that scope. Pages that reference --dl-* WITHOUT the
+   landing-page scope (dashboard, settings, …) fall through to the body's
+   pure-black bg / pure-white text anyway. */
+html.high-contrast .landing-page {
+  --dl-navy: #000000;
+  --dl-navy-2: #000000;
+  --dl-navy-3: #000000;
+  --dl-white: #ffffff;
+  --dl-text-on-navy: #ffffff;
+  --dl-text-muted: #e5e7eb;
+  --dl-text-dark: #ffffff;
+  --dl-shadow-soft: none;
+  --dl-shadow-glow-blue: none;
+  --dl-shadow-glow-orange: none;
+
+  --navy: #000000;
+  --navy-2: #000000;
+  --navy-3: #000000;
+  --white: #ffffff;
+  --text-on-navy: #ffffff;
+  --text-muted: #e5e7eb;
+  --text-dark: #ffffff;
+  --shadow-soft: none;
+  --shadow-glow-blue: none;
+  --shadow-glow-orange: none;
+}
+
+/* Force the body to pure black under high contrast: the root layout
+   paints <body> with an unlayered bg-[#0B1F3A] utility, which outranks
+   the @layer base body rule — so the !important override is required.
+   (The ambient radial wash is removed too.) */
+html.high-contrast body {
+  background-color: #000000 !important;
+  background-image: none;
+}
+
+/* Strip decorative gradients everywhere: Tailwind's bg-gradient-to-*
+   utilities AND arbitrary radial/linear-gradient values both contain
+   "gradient" in the class name. Solid colour surfaces and icons are
+   untouched. */
+html.high-contrast [class*="gradient"] {
+  background-image: none !important;
+}
+
+/* Subtle white borders become clearly visible lines on the black
+   surface (the step spec asks for the "subtle" ones removed). */
+html.high-contrast [class*="border-white/"] {
+  border-color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* ---------------------------------------------------------------------
+   MapLibre popup — dark Emergency-Ops theme override
+   --------------------------------------------------------------------- */
+.maplibregl-popup-content {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.625rem !important;
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.3),
+    0 0 18px rgba(56, 189, 248, 0.2) !important;
+  padding: 0 !important;
+}
+
+.maplibregl-popup-close-button {
+  color: var(--foreground) !important;
+  font-size: 18px;
+  padding: 4px 8px;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: var(--surface) !important;
+  border-bottom-color: var(--surface) !important;
+}
+
+/* ---------------------------------------------------------------------
+   Smooth custom HTML markers — every MapLibre HTML marker (shelters,
+   depots, closures, ground reports, fleet pin) gets a gentle 0.3s ease on
+   all property changes so markers glide instead of snapping.
+   --------------------------------------------------------------------- */
+.maplibregl-marker {
+  transition: all 0.3s ease;
+}
+
+/* rAF-animated markers (e.g. the fleet boat) opt out so per-frame
+   setLngLat updates stay frame-accurate. */
+.maplibregl-marker.no-anim {
+  transition: none;
+}
+
+/* =====================================================================
+   SAFESPHERE AI LANDING PAGE TOKENS
+   Phase 1 — Design System & Global Setup
+   ===================================================================== */
+
+/* Legacy --dl-* navy tokens, promoted from the .landing-page scope to
+   :root so EVERY surface that references them (citizen portal, gov AI
+   planner, transparency panel…) resolves real values instead of falling
+   back to inherited full-strength text. Names cannot collide with the
+   roadmap set (--text-muted/--radius-sm are unprefixed). .landing-page
+   below keeps identical overrides (harmless), and the high-contrast
+   block above still wins via specificity. */
+:root {
+  --dl-navy: #0b1f3a;
+  --dl-navy-2: #0f2a4f;
+  --dl-navy-3: #132f57;
+  --dl-blue: #2563eb;
+  --dl-blue-light: #5b8df6;
+  --dl-orange: #f97316;
+  --dl-orange-light: #fdba74;
+  --dl-white: #ffffff;
+  --dl-gray: #f8fafc;
+  --dl-gray-2: #e7ecf3;
+  --dl-text-dark: #0f1b2d;
+  --dl-text-muted: #5b6b84;
+  --dl-text-on-navy: #c9d6ec;
+  --dl-radius: 18px;
+  --dl-radius-sm: 12px;
+  --dl-shadow-soft: 0 10px 40px -12px rgba(11, 31, 58, 0.18);
+  --dl-shadow-glow-blue:
+    0 0 0 1px rgba(37, 99, 235, 0.25), 0 20px 60px -20px rgba(37, 99, 235, 0.45);
+  --dl-shadow-glow-orange:
+    0 0 0 1px rgba(249, 115, 22, 0.25), 0 20px 60px -20px rgba(249, 115, 22, 0.45);
+}
+
+.landing-page {
+  --dl-navy: #0b1f3a;
+  --dl-navy-2: #0f2a4f;
+  --dl-navy-3: #132f57;
+  --dl-blue: #2563eb;
+  --dl-blue-light: #5b8df6;
+  --dl-orange: #f97316;
+  --dl-orange-light: #fdba74;
+  --dl-white: #ffffff;
+  --dl-gray: #f8fafc;
+  --dl-gray-2: #e7ecf3;
+  --dl-text-dark: #0f1b2d;
+  --dl-text-muted: #5b6b84;
+  --dl-text-on-navy: #c9d6ec;
+  --dl-radius: 18px;
+  --dl-radius-sm: 12px;
+  --dl-shadow-soft: 0 10px 40px -12px rgba(11, 31, 58, 0.18);
+  --dl-shadow-glow-blue:
+    0 0 0 1px rgba(37, 99, 235, 0.25), 0 20px 60px -20px rgba(37, 99, 235, 0.45);
+  --dl-shadow-glow-orange:
+    0 0 0 1px rgba(249, 115, 22, 0.25), 0 20px 60px -20px rgba(249, 115, 22, 0.45);
+
+  /* =====================================================================
+     PHASE 1 · CANONICAL TOKENS
+     Same values as the --dl-* set above, under the exact names specified
+     in the Phase 1 design-system spec. Scoped to .landing-page (NOT :root)
+     so they never collide with the global roadmap tokens (e.g. the app's
+     --radius-sm: 6px and --text-muted: #64748b). New landing components
+     should consume these; the --dl-* names stay for legacy surfaces.
+     ===================================================================== */
+  --navy: #0b1f3a;
+  --navy-2: #0f2a4f;
+  --navy-3: #132f57;
+  --blue: #2563eb;
+  --blue-light: #5b8df6;
+  --orange: #f97316;
+  --orange-light: #fdba74;
+  --white: #ffffff;
+  --gray: #f8fafc;
+  --gray-2: #e7ecf3;
+  --text-dark: #0f1b2d;
+  --text-muted: #5b6b84;
+  --text-on-navy: #c9d6ec;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow-soft: 0 10px 40px -12px rgba(11, 31, 58, 0.18);
+  --shadow-glow-blue:
+    0 0 0 1px rgba(37, 99, 235, 0.25), 0 20px 60px -20px rgba(37, 99, 235, 0.45);
+  --shadow-glow-orange:
+    0 0 0 1px rgba(249, 115, 22, 0.25), 0 20px 60px -20px rgba(249, 115, 22, 0.45);
+
+  scroll-behavior: smooth;
+
+  /* Anchor links (#platform, #how-it-works, …) must land BELOW the fixed
+     top bars instead of scrolling underneath them: the floating landing pill
+     (~64px) and the app's sticky h-14 DashboardTopBar (+ gov SituationHeader
+     at top-14). 5rem clears both with a little breathing room. */
+  scroll-padding-top: 5rem;
+}
+
+/* Landing page keyframe animations */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes dotpulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+  }
+}
+@keyframes mpulse {
+  0% {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+@keyframes orbpulse {
+  0%,
+  100% {
+    box-shadow: var(--dl-shadow-glow-blue);
+  }
+  50% {
+    box-shadow: var(--dl-shadow-glow-orange);
+  }
+}
+@keyframes flowdown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(400%);
+  }
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Phase 2 · Prompt 2.1 — Mesh gradient drift animations (20s infinite) */
+@keyframes mesh-drift-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(60px, 30px) scale(1.05);
+  }
+  50% {
+    transform: translate(20px, -40px) scale(0.95);
+  }
+  75% {
+    transform: translate(-40px, 20px) scale(1.02);
+  }
+}
+@keyframes mesh-drift-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(-50px, -30px) scale(0.98);
+  }
+  50% {
+    transform: translate(40px, 50px) scale(1.06);
+  }
+  75% {
+    transform: translate(30px, -20px) scale(0.97);
+  }
+}
+@keyframes mesh-drift-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, -50px) scale(1.03);
+  }
+  50% {
+    transform: translate(-60px, 20px) scale(0.96);
+  }
+  75% {
+    transform: translate(-20px, 40px) scale(1.04);
+  }
+}
+
+@keyframes scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-floaty {
+  animation: floaty 5s ease-in-out infinite;
+}
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+.animate-dotpulse {
+  animation: dotpulse 1.6s infinite;
+}
+.animate-mpulse {
+  animation: mpulse 2.2s ease-out infinite;
+}
+.animate-orbpulse {
+  animation: orbpulse 2.4s ease-in-out infinite;
+}
+.animate-flowdown {
+  animation: flowdown 1.8s linear infinite;
+}
+.animate-gradient-shift {
+  animation: gradient-shift 6s ease infinite;
+  background-size: 200% 200%;
+}
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+.animate-mesh-drift-1 {
+  animation: mesh-drift-1 20s ease-in-out infinite;
+}
+.animate-mesh-drift-2 {
+  animation: mesh-drift-2 20s ease-in-out infinite;
+}
+.animate-mesh-drift-3 {
+  animation: mesh-drift-3 20s ease-in-out infinite;
+}
+
+/* Phase 3 · Login page — Floating particles */
+@keyframes particle-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 50%;
+  animation: particle-float 15s ease-in-out infinite;
+}
+
+.particle-1 {
+  left: 10%;
+  bottom: -10px;
+  animation-delay: 0s;
+  animation-duration: 18s;
+}
+
+.particle-2 {
+  left: 25%;
+  bottom: -10px;
+  animation-delay: 3s;
+  animation-duration: 22s;
+  background: rgba(139, 92, 246, 0.3);
+}
+
+.particle-3 {
+  left: 50%;
+  bottom: -10px;
+  animation-delay: 6s;
+  animation-duration: 20s;
+  background: rgba(59, 130, 246, 0.3);
+}
+
+.particle-4 {
+  left: 70%;
+  bottom: -10px;
+  animation-delay: 9s;
+  animation-duration: 24s;
+  background: rgba(249, 115, 22, 0.2);
+}
+
+.particle-5 {
+  left: 85%;
+  bottom: -10px;
+  animation-delay: 12s;
+  animation-duration: 19s;
+  background: rgba(59, 130, 246, 0.25);
+}
+
+/* Phase 3 · OTP error shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Landing page typography — Poppins for display headings */
+.landing-page h1,
+.landing-page h2,
+.landing-page h3,
+.landing-page h4 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+}
+
+/* Landing page keyframe animations — disable under reduced motion. All CSS
+   driven loops (floaty chips, pulse rings, marquee ticker, flowing pipeline
+   dots) use one of these classes; honoring prefers-reduced-motion here makes
+   the transitions instant so no element keeps looping. The Framer Motion
+   components (ScrollReveal, Hero reveals, count-up) already gate on
+   useReducedMotion — this block covers the plain-CSS utilities. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-floaty,
+  .animate-marquee,
+  .animate-dotpulse,
+  .animate-mpulse,
+  .animate-orbpulse,
+  .animate-flowdown,
+  .animate-shimmer {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------------
+ * Gov Ops Map (Phase 8) — MapboxDraw dark-theme shims, scoped under
+ * .gov-ops-map (the GovMapWorkspace root) so the citizen map's controls
+ * are untouched. The plugin's stock CSS ships mapboxgl-* classes and
+ * black icons; on the dark workspace the buttons were invisible, the
+ * toolbar collided with the "Back to Dashboard" button, and its
+ * maplibregl-* cursor rules never matched. The mapbox-gl-draw.css import
+ * stays for the .mapbox-gl-draw_ctrl-draw-btn class + icon positions.
+ * ---------------------------------------------------------------------- */
+.gov-ops-map .maplibregl-ctrl-top-left {
+  /* Clear the floating "Back to Dashboard" button (top-4 + ~44px). */
+  top: 66px;
+}
+
+/* The Alert Composer's mini target map (Phase 11) reuses the same dark
+ * draw toolbar. Controls sit at the top-left with a little breathing room. */
+.alert-target-map .maplibregl-ctrl-top-left {
+  top: 12px;
+}
+
+.gov-ops-map .maplibregl-ctrl-group.mapbox-gl-draw_ctrl,
+.alert-target-map .maplibregl-ctrl-group.mapbox-gl-draw_ctrl {
+  background: transparent;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.gov-ops-map .mapbox-gl-draw_ctrl-draw-btn,
+.alert-target-map .mapbox-gl-draw_ctrl-draw-btn {
+  width: 38px;
+  height: 38px;
+  margin: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background-color: #0d1526;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.gov-ops-map .mapbox-gl-draw_ctrl-draw-btn:hover,
+.alert-target-map .mapbox-gl-draw_ctrl-draw-btn:hover {
+  background-color: #16223a;
+}
+
+.gov-ops-map .mapbox-gl-draw_ctrl-draw-btn.active,
+.gov-ops-map .mapbox-gl-draw_ctrl-draw-btn.active:hover,
+.alert-target-map .mapbox-gl-draw_ctrl-draw-btn.active,
+.alert-target-map .mapbox-gl-draw_ctrl-draw-btn.active:hover {
+  background-color: #1a2a45;
+  box-shadow: 0 0 14px rgba(91, 141, 246, 0.45);
+}
+
+/* White icon fills (the stock data-URIs are black → invisible on dark). */
+.gov-ops-map .mapbox-gl-draw_point,
+.alert-target-map .mapbox-gl-draw_point {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23ffffff'%3E%3Cpath d='m10 2c-3.3 0-6 2.7-6 6s6 9 6 9 6-5.7 6-9-2.7-6-6-6zm0 2c2.1 0 3.8 1.7 3.8 3.8 0 1.5-1.8 3.9-2.9 5.2h-1.7c-1.1-1.4-2.9-3.8-2.9-5.2-.1-2.1 1.6-3.8 3.7-3.8z'/%3E%3C/svg%3E");
+}
+.gov-ops-map .mapbox-gl-draw_polygon,
+.alert-target-map .mapbox-gl-draw_polygon {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23ffffff'%3E%3Cpath d='m15 12.3v-4.6c.6-.3 1-1 1-1.7 0-1.1-.9-2-2-2-.7 0-1.4.4-1.7 1h-4.6c-.3-.6-1-1-1.7-1-1.1 0-2 .9-2 2 0 .7.4 1.4 1 1.7v4.6c-.6.3-1 1-1 1.7 0 1.1.9 2 2 2 .7 0 1.4-.4 1.7-1h4.6c.3.6 1 1 1.7 1 1.1 0 2-.9 2-2 0-.7-.4-1.4-1-1.7zm-8-.3v-4l1-1h4l1 1v4l-1 1h-4z'/%3E%3C/svg%3E");
+}
+.gov-ops-map .mapbox-gl-draw_line,
+.alert-target-map .mapbox-gl-draw_line {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23ffffff'%3E%3Cpath d='m13.5 3.5c-1.4 0-2.5 1.1-2.5 2.5 0 .3 0 .6.2.9l-3.8 3.8c-.3-.1-.6-.2-.9-.2-1.4 0-2.5 1.1-2.5 2.5s1.1 2.5 2.5 2.5 2.5-1.1 2.5-2.5c0-.3 0-.6-.2-.9l3.8-3.8c.3.1.6.2.9.2 1.4 0 2.5-1.1 2.5-2.5s-1.1-2.5-2.5-2.5z'/%3E%3C/svg%3E");
+}
+.gov-ops-map .mapbox-gl-draw_trash,
+.alert-target-map .mapbox-gl-draw_trash {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23ffffff'%3E%3Cpath d='M10,3.4 c-0.8,0-1.5,0.5-1.8,1.2H5l-1,1v1h12v-1l-1-1h-3.2C11.5,3.9,10.8,3.4,10,3.4z M5,8v7c0,1,1,2,2,2h6c1,0,2-1,2-2V8h-2v5.5h-1.5V8h-3 v5.5H7V8H5z'/%3E%3C/svg%3E");
+}
+
+/* =====================================================================
+   GOOGLE TRANSLATE WIDGET — dark theme (landing Navbar)
+   ---------------------------------------------------------------------
+   layout.tsx injects TranslateElement into #google_translate_element
+   (components/landing/layout/Navbar.tsx). Google's widget ships a white
+   <select>, a top banner and a hover tooltip; these overrides re-theme
+   the dropdown to the SafeSphere navy palette and strip the banner +
+   tooltip chrome so only the compact select shows in the navbar.
+   ===================================================================== */
+/* Hide the full-width top banner Google injects above the page. */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  visibility: hidden !important;
+}
+
+/* Google shifts <body> down by 39px for that banner — reset so the
+   fixed navbar and hero stay put. */
+body {
+  top: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Kill any Google Translate wrapper that reserves space at the top. */
+#skiptranslate {
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+}
+
+.skiptranslate iframe {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+}
+
+/* The hover tooltip that pops up over translated words. */
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+/* Widget host — inline-block so it sits in the navbar flex row. */
+.translate-widget-container {
+  display: inline-block;
+}
+
+/* The native <select> Google injects — dark pill matching the navbar. */
+#google_translate_element select.goog-te-combo {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  padding: 0.45rem 2rem 0.45rem 0.9rem;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+#google_translate_element select.goog-te-combo:hover {
+  border-color: rgba(91, 141, 246, 0.6);
+}
+
+#google_translate_element select.goog-te-combo:focus {
+  border-color: #5b8df6;
+}
+
+/* Dropdown listbox (Firefox paints it with the select's own colors). */
+#google_translate_element select.goog-te-combo option {
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+/* The "Powered by Google" gadget text + logo — hide the chrome and dim
+   any stray label so only the select is visible. font-size: 0 on the
+   wrapper hides the "Select Language" span while the select (explicit
+   font-size above) stays crisp. */
+.goog-te-gadget {
+  font-size: 0 !important;
+  color: transparent !important;
+}
+
+.goog-te-gadget .goog-logo-link,
+.goog-te-gadget img {
+  display: none !important;
+}
+
+/* --- GOOGLE TRANSLATE CUSTOM DARK THEME --- */
+/* Hide the Google branding and top banner */
+.goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+.goog-te-gadget .goog-te-combo { margin: 0 !important; }
+.goog-logo-link { display: none !important; }
+.goog-te-banner-frame.skiptranslate { display: none !important; }
+body { top: 0px !important; }
+
+/* Style the dropdown box to look like our dark outline buttons */
+.goog-te-combo {
+    background-color: transparent !important;
+    color: #f1f5f9 !important; /* text-slate-100 */
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 9999px !important; /* rounded-full */
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    font-family: inherit !important;
+    outline: none !important;
+    cursor: pointer !important;
+    appearance: none !important;
+}
+
+/* Style the dropdown options (when clicked) */
+.goog-te-combo option {
+    background-color: #0f172a !important; /* slate-900 */
+    color: #f1f5f9 !important;
+    padding: 8px !important;
+}
+
+/* =====================================================================
+   REDUCED MOTION OVERRIDES (Phase 17 · Step 6)
+   ---------------------------------------------------------------------
+   When .reduced-motion is on <html> (via ReducedMotionContext) OR the
+   system prefers-reduced-motion: reduce, disable all non-essential
+   animations and transitions.
+   ===================================================================== */
+
+/* System-level preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse,
+  .animate-ping,
+  .animate-spin,
+  .animate-bounce,
+  .animate-alert-pulse,
+  .animate-sos-glow,
+  .animate-severity-pulse,
+  .animate-ai-thinking,
+  .animate-icon-bounce,
+  .animate-icon-spin {
+    animation: none !important;
+  }
+
+  /* Framer Motion: disable all transforms */
+  [style*="transform"] {
+    transform: none !important;
+  }
+}
+
+/* Manual toggle via settings */
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.reduced-motion .animate-pulse,
+html.reduced-motion .animate-ping,
+html.reduced-motion .animate-spin,
+html.reduced-motion .animate-bounce,
+html.reduced-motion .animate-alert-pulse,
+html.reduced-motion .animate-sos-glow,
+html.reduced-motion .animate-severity-pulse,
+html.reduced-motion .animate-ai-thinking,
+html.reduced-motion .animate-icon-bounce,
+html.reduced-motion .animate-icon-spin {
+  animation: none !important;
+}
+
+/* Keep essential transitions (form focus, hover feedback) */
+html.reduced-motion button,
+html.reduced-motion a,
+html.reduced-motion input,
+html.reduced-motion select,
+html.reduced-motion textarea {
+  transition: box-shadow 100ms ease, border-color 100ms ease !important;
+}
+
+/* Support button slide-up animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-up {
+  animation: slide-up 0.2s ease-out;
+}
